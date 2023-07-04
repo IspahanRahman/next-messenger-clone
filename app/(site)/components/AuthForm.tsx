@@ -4,7 +4,11 @@ import Input from "@/app/components/inputs/Input";
 import { useCallback, useState } from "react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import AuthSocialButton from "./AuthSocialButton";
-import { BsGithub, BsGoogle } from "react-icons/bs"
+import { BsGithub, BsGoogle } from "react-icons/bs";
+import axios from "axios";
+import { toast } from "react-hot-toast";
+import { signIn } from 'next-auth/react'
+
 type Variant = "Login" | "Register";
 
 const AuthForm = () => {
@@ -36,18 +40,44 @@ const AuthForm = () => {
 
   const onSubmit: SubmitHandler<FieldValues> = (data) =>{
     setLoading(true);
+    if(variant === 'Register' ){
+      axios.post('/api/register',data)
+      .catch(()=> toast.error(' Something went wrong! '))
+      .finally(()=>setLoading(false));
+    }
 
     if( variant === 'Login' ){
-      //axios Register
+     signIn('credentials',{
+      ...data,
+      redirect: false
+     })
+     .then((callback)=>{
+      if(callback?.error){
+        toast.error('Invalid credentials');
+      }
+      if(callback?.ok && !callback?.error){
+        toast.success('Logged in!');
+      }
+     })
+     .finally(()=> setLoading(false));
     }
-    if(variant === 'Register' ){
-      //Nextauth Signin
-    }
+    
   }
 
   const socialAction = (action:string) =>{
     setLoading(true);
-    //Nextauth Social Sign In
+    
+    signIn(action, {redirect: false})
+    .then((callback)=>{
+      if(callback?.error){
+        toast.error('Invalid Credentials');
+      }
+
+      if(callback?.ok && !callback?.error){
+        toast.success("Logged In!");
+      }
+    })
+    .finally(()=> setLoading(false));
   }
   return (
     <div 
@@ -65,8 +95,8 @@ const AuthForm = () => {
         >
           {variant === "Register" && (
             <Input 
-              id="email" 
-              label="Email" 
+              id="name" 
+              label="Name" 
               register={register}
               errors={errors}
               disabled={isLoading}
