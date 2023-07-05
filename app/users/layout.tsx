@@ -1,4 +1,3 @@
-import DesktopSidebar from "../components/sidebar/DesktopSidebar"
 import Sidebar from "../components/sidebar/Sidebar"
 
 export default async function UsersLayout({
@@ -8,10 +7,7 @@ export default async function UsersLayout({
   return (
     <Sidebar>
       <div className="h-full">
-        <DesktopSidebar/>
-        <main className="lg:pl-20 h-full">
-          {children}
-        </main>
+        {children}
       </div>
     </Sidebar>
   )
